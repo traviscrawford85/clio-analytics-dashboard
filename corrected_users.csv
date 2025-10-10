@@ -1,0 +1,8 @@
+email,first_name,last_name,initials,time_zone,subscription_type
+travis.crawford@cfelab.com,Travis,Crawford,TC,Eastern,Administrator
+lit.attorney@cfelab.com,Lisa,Litigator,LL,Eastern,Litigation
+lit.assistant@cfelab.com,Amy,Assistant,AA,Eastern,Litigation
+prelitigation.attorney@cfelab.com,Paul,Prelit,PP,Eastern,Prelitigation
+prelitigation.assistant@cfelab.com,Nina,Assistant,SA,Eastern,Prelitigation
+operations@cfelab.com,Omar,Ops,OO,Eastern,Accounts
+intake.department@cfelab.com,Ivy,Intake,II,Eastern,Intake

@@ -1,0 +1,64 @@
+FROM python:3.11-slim
+
+# Build arguments
+ARG BUILD_ENV=production
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+COPY requirements-cfe.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements-cfe.txt
+
+# Copy application code
+COPY dash_clio_dashboard/ ./dash_clio_dashboard/
+COPY src/ ./src/
+COPY config/ ./config/
+COPY services/ ./services/
+COPY auth/ ./auth/
+
+# Copy generated gRPC stubs (these would be generated from your proto files)
+COPY generated/ ./generated/
+
+# Create volume mount points
+RUN mkdir -p /data/analytics
+RUN mkdir -p /run/secrets
+
+# Create non-root user for security
+RUN groupadd -r dashuser && useradd -r -g dashuser dashuser
+RUN chown -R dashuser:dashuser /app /data
+
+# Switch to non-root user
+USER dashuser
+
+# Expose port
+EXPOSE 8050
+
+# Set environment variables
+ENV DASH_PORT=8050
+ENV DASH_DEBUG=False
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8050/health || exit 1
+
+# Development vs Production configuration
+RUN if [ "$BUILD_ENV" = "development" ]; then \
+        pip install --no-cache-dir debugpy; \
+    fi
+
+# Run dashboard
+CMD ["python", "dash_clio_dashboard/app.py"]

@@ -1,0 +1,8 @@
+dash>=2.14.0
+dash-bootstrap-components>=1.5.0
+dash-mantine-components>=0.14.0
+plotly>=5.18.0
+pandas>=2.0.0
+neo4j>=5.14.0
+redis>=5.0.0
+requests>=2.31.0

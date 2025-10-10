@@ -1,0 +1,76 @@
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clio-analytics-dashboard
+    ports:
+      - "8501:8501"  # Updated for nginx integration
+    environment:
+      # Dashboard configuration
+      - DASH_PORT=8501
+      - DASH_DEBUG=False
+
+      # Database configuration
+      - CLIO_SQLITE=/data/analytics/clio-analytics.db
+      - DATA_BACKEND=sqlite
+
+      # Python configuration
+      - PYTHONUNBUFFERED=1
+
+    volumes:
+      # Mount the database directory from dashboard-neo4j project
+      - ../dashboard-neo4j/data/analytics:/data/analytics:ro
+
+      # Optional: Mount source for hot reload during development
+      # Uncomment these lines for development mode
+      # - ./dash_clio_dashboard:/app/dash_clio_dashboard
+      # - ./src:/app/src
+
+    restart: unless-stopped
+
+    networks:
+      - clio-network
+      - cfesolutions
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Resource limits (optional)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  clio-network:
+    driver: bridge
+  cfesolutions:
+    external: true
+
+# Optional: Add nginx reverse proxy
+# Uncomment to enable
+#
+# nginx:
+#   image: nginx:alpine
+#   container_name: clio-nginx
+#   ports:
+#     - "80:80"
+#     - "443:443"
+#   volumes:
+#     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+#     - ./ssl:/etc/nginx/ssl:ro
+#   depends_on:
+#     - dashboard
+#   networks:
+#     - clio-network
+#   restart: unless-stopped

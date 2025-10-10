@@ -127,6 +127,21 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.local
+.env.production
+.env.development
+
+# Security files
+*.key
+*.pem
+*secret*
+*.crt
+*.p12
+*.pfx
+
+# CFE Solutions specific
+cfe_secrets/
+docker-secrets/
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache

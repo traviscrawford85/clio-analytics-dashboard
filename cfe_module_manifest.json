@@ -1,0 +1,201 @@
+{
+  "module": {
+    "name": "dashboard_analytics",
+    "display_name": "Professional Analytics Dashboard",
+    "version": "1.0.0",
+    "description": "Sophisticated legal practice analytics dashboard with network visualization capabilities",
+    "category": "analytics",
+    "type": "web_service",
+    "priority": "high",
+    "tags": ["analytics", "dashboard", "visualization", "network", "reporting"]
+  },
+  "service": {
+    "type": "dash",
+    "port": 8052,
+    "health_endpoint": "/health",
+    "metrics_endpoint": "/metrics",
+    "api_endpoints": [
+      {
+        "path": "/api/analytics/overview",
+        "method": "GET",
+        "description": "Financial and operational overview metrics"
+      },
+      {
+        "path": "/api/analytics/matters",
+        "method": "GET", 
+        "description": "Matter lifecycle and performance data"
+      },
+      {
+        "path": "/api/analytics/network",
+        "method": "GET",
+        "description": "Network relationship visualization data"
+      },
+      {
+        "path": "/api/analytics/bottlenecks",
+        "method": "GET",
+        "description": "Workflow bottleneck analysis"
+      }
+    ]
+  },
+  "dependencies": {
+    "required_services": [
+      "neo4j",
+      "cliocore_intelligence"
+    ],
+    "optional_services": [
+      "custom_fields_manager",
+      "billables_insight"
+    ],
+    "external_apis": [
+      "clio_api"
+    ]
+  },
+  "deployment": {
+    "docker": {
+      "image": "cfe-dashboard-analytics:latest",
+      "dockerfile": "Dockerfile.cfe",
+      "compose_file": "docker-compose.cfe.yml",
+      "volumes": [
+        "analytics_shared:/app/shared",
+        "dashboard_data:/app/data"
+      ],
+      "environment_variables": [
+        "CLIO_CLIENT_ID",
+        "CLIO_CLIENT_SECRET",
+        "NEO4J_URI",
+        "NEO4J_USER",
+        "NEO4J_PASSWORD",
+        "REDIS_URL"
+      ]
+    },
+    "network": {
+      "name": "cfesolutions",
+      "mode": "bridge",
+      "service_discovery": true
+    }
+  },
+  "monitoring": {
+    "health_checks": [
+      {
+        "name": "dashboard_responsive",
+        "endpoint": "/health",
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3
+      },
+      {
+        "name": "neo4j_connectivity",
+        "type": "tcp",
+        "target": "neo4j:7687",
+        "interval": "60s"
+      }
+    ],
+    "metrics": [
+      "dashboard_load_time",
+      "api_response_time",
+      "network_query_performance",
+      "user_session_duration"
+    ]
+  },
+  "configuration": {
+    "auto_start": true,
+    "restart_policy": "unless-stopped",
+    "resource_limits": {
+      "memory": "512MB",
+      "cpu": "0.5"
+    },
+    "scaling": {
+      "min_instances": 1,
+      "max_instances": 3,
+      "auto_scale": false
+    }
+  },
+  "integration": {
+    "data_sources": [
+      {
+        "name": "clio_api",
+        "type": "rest_api",
+        "authentication": "oauth2",
+        "endpoints": ["matters", "clients", "users", "time_entries"]
+      },
+      {
+        "name": "neo4j_graph",
+        "type": "graph_database",
+        "queries": ["client_networks", "matter_relationships", "vendor_connections"]
+      }
+    ],
+    "event_streams": [
+      {
+        "name": "matter_updates",
+        "source": "cliocore_intelligence",
+        "handler": "update_analytics_cache"
+      },
+      {
+        "name": "billing_events",
+        "source": "billables_insight",
+        "handler": "refresh_financial_metrics"
+      }
+    ]
+  },
+  "ui": {
+    "navigation": [
+      {
+        "label": "Analytics Overview",
+        "path": "/",
+        "icon": "dashboard",
+        "description": "Financial and operational dashboard"
+      },
+      {
+        "label": "Network Insights",
+        "path": "/network",
+        "icon": "network",
+        "description": "Relationship and network analysis"
+      },
+      {
+        "label": "Bottleneck Analysis",
+        "path": "/bottlenecks",
+        "icon": "warning",
+        "description": "Workflow efficiency analysis"
+      }
+    ],
+    "theme": {
+      "primary_color": "#1E3A5F",
+      "secondary_color": "#2C5282",
+      "success_color": "#276749",
+      "fonts": {
+        "primary": "Inter",
+        "secondary": "Crimson Pro"
+      }
+    }
+  },
+  "security": {
+    "authentication": {
+      "type": "jwt",
+      "provider": "cfesolutions_auth",
+      "scopes": ["analytics:read", "analytics:write", "network:read"]
+    },
+    "authorization": {
+      "role_based": true,
+      "roles": ["admin", "partner", "associate", "paralegal"],
+      "permissions": {
+        "admin": ["*"],
+        "partner": ["analytics:*", "network:read"],
+        "associate": ["analytics:read"],
+        "paralegal": ["analytics:read:limited"]
+      }
+    }
+  },
+  "documentation": {
+    "api_spec": "/api/openapi.json",
+    "user_guide": "/docs/user_guide.md",
+    "admin_guide": "/docs/admin_guide.md",
+    "troubleshooting": "/docs/troubleshooting.md"
+  },
+  "metadata": {
+    "created_at": "2024-01-15T00:00:00Z",
+    "updated_at": "2024-01-15T00:00:00Z",
+    "author": "CFE Solutions",
+    "license": "Proprietary",
+    "keywords": ["legal", "analytics", "dashboard", "network", "visualization", "professional"]
+  }
+}

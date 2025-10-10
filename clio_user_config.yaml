@@ -1,0 +1,91 @@
+firm:
+  name: "Law Office of CFE Solutions"
+  owner_email: "travis.crawford@cfelab.com"
+  system_admin_email: "travis.crawford@cfelab.com"
+  automation_agent_email: "automation@cfelab.com"
+  sync_frequency: "weekly"
+  default_role: "User"
+
+users:
+  - name: "Travis Crawford"
+    email: travis.crawford@cfelab.com
+    roles:
+      - Owner
+      - Attorney
+      - Administrator
+    group_memberships:
+      - litigation-team
+      - prelitigation-team
+      - operations-team
+    id: null
+
+  - name: "Lisa Litigator"
+    email: lit.attorney@cfelab.com
+    roles:
+      - Attorney
+    group_memberships:
+      - litigation-team
+    id: null
+
+  - name: "Amy Assistant"
+    email: lit.assistant@cfelab.com
+    roles:
+      - Assistant
+    group_memberships:
+      - litigation-team
+    id: null
+
+  - name: "Paul Prelit"
+    email: prelitigation.attorney@cfelab.com
+    roles:
+      - Attorney
+    group_memberships:
+      - prelitigation-team
+    id: null
+
+  - name: "Nina Assistant"
+    email: prelitigation.assistant@cfelab.com
+    roles:
+      - Assistant
+    group_memberships:
+      - prelitigation-team
+    id: null
+
+  - name: "Omar Ops"
+    email: operations@cfelab.com
+    roles:
+      - Operations
+    group_memberships:
+      - operations-team
+    id: null
+
+  - name: "Ivy Intake"
+    email: intake.department@cfelab.com
+    roles:
+      - Intake
+    group_memberships:
+      - intake-team
+    id: null
+
+groups:
+  - name: intake-team
+    members:
+      - intake.department@cfelab.com
+      - travis.crawford@cfelab.com
+
+  - name: prelitigation-team
+    members:
+      - prelitigation.attorney@cfelab.com
+      - prelitigation.assistant@cfelab.com
+      - travis.crawford@cfelab.com
+
+  - name: litigation-team
+    members:
+      - lit.attorney@cfelab.com
+      - lit.assistant@cfelab.com
+      - travis.crawford@cfelab.com
+
+  - name: operations-team
+    members:
+      - operations@cfelab.com
+      - travis.crawford@cfelab.com

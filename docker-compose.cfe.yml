@@ -1,0 +1,150 @@
+version: '3.8'
+
+services:
+  dashboard-analytics:
+    build:
+      context: .
+      dockerfile: Dockerfile.cfe
+      args:
+        - BUILD_ENV=production
+    container_name: dashboard-analytics
+    hostname: dashboard-analytics
+    
+    ports:
+      - "8052:8052"
+    
+    environment:
+      # Dashboard configuration
+      - DASH_PORT=8052
+      - DASH_DEBUG=false
+      - DASH_HOST=0.0.0.0
+      
+      # Service discovery configuration
+      - CLIOCORE_SERVICE_HOST=cliocore-intelligence
+      - CLIOCORE_GRPC_PORT=9090
+      - CLIOCORE_REST_PORT=8080
+      
+      # Neo4j configuration
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD_FILE=/run/secrets/neo4j_password
+      
+      # ChromaDB configuration  
+      - CHROMADB_HOST=chromadb
+      - CHROMADB_PORT=8000
+      
+      # Custom Fields Manager
+      - CUSTOM_FIELDS_HOST=custom-fields-manager
+      - CUSTOM_FIELDS_GRPC_PORT=9091
+      
+      # Billables Insight Service
+      - BILLABLES_HOST=billables-insight
+      - BILLABLES_GRPC_PORT=9092
+      
+      # Database configuration
+      - CLIO_SQLITE=/data/analytics/clio-analytics.db
+      - DATA_BACKEND=hybrid  # sqlite + grpc services
+      
+      # Security configuration
+      - AUTH_ENABLED=true
+      - JWT_SECRET_FILE=/run/secrets/jwt_secret
+      
+    volumes:
+      # Shared data volume
+      - cfe-analytics-data:/data/analytics:ro
+      
+      # Configuration volume
+      - ./config:/app/config:ro
+      
+      # Optional: Development hot reload
+      # - ./dash_clio_dashboard:/app/dash_clio_dashboard
+      # - ./src:/app/src
+    
+    secrets:
+      - neo4j_password
+      - jwt_secret
+    
+    networks:
+      - cfesolutions
+    
+    depends_on:
+      cliocore-intelligence:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      chromadb:
+        condition: service_healthy
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8050/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.cfe.local`)"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=8050"
+      - "cfe.service.type=dashboard"
+      - "cfe.service.version=1.0.0"
+
+  # Development hot-reload service (optional)
+  clio-dashboard-dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: Dockerfile.cfe
+      args:
+        - BUILD_ENV=development
+    container_name: clio-dashboard-dev
+    hostname: dashboard-dev
+    
+    ports:
+      - "8051:8050"
+    
+    environment:
+      - DASH_PORT=8050
+      - DASH_DEBUG=true
+      - DASH_HOST=0.0.0.0
+      # ... same environment as production but with debug enabled
+      
+    volumes:
+      - ./dash_clio_dashboard:/app/dash_clio_dashboard
+      - ./src:/app/src
+      - ./config:/app/config:ro
+      - cfe-analytics-data:/data/analytics:ro
+    
+    networks:
+      - cfesolutions
+    
+    restart: "no"  # Don't restart dev container automatically
+
+networks:
+  cfesolutions:
+    external: true
+    name: cfesolutions
+
+volumes:
+  cfe-analytics-data:
+    external: true
+    name: cfe-analytics-data
+
+secrets:
+  neo4j_password:
+    external: true
+    name: cfe_neo4j_password
+  jwt_secret:
+    external: true
+    name: cfe_jwt_secret

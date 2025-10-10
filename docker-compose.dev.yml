@@ -1,0 +1,49 @@
+version: '3.8'
+
+# Development version with hot reload and debug mode
+
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clio-kpi-dashboard-dev
+    ports:
+      - "8050:8050"
+    environment:
+      # Dashboard configuration (DEBUG MODE)
+      - DASH_PORT=8050
+      - DASH_DEBUG=True
+
+      # Database configuration
+      - CLIO_SQLITE=/data/analytics/clio-analytics.db
+      - DATA_BACKEND=sqlite
+
+      # Python configuration
+      - PYTHONUNBUFFERED=1
+      - DASHBOARD_DEBUG=1
+
+    volumes:
+      # Mount database (read-only)
+      - ../dashboard-neo4j/data/analytics:/data/analytics:ro
+
+      # Mount source code for hot reload
+      - ./dash_clio_dashboard:/app/dash_clio_dashboard
+      - ./src:/app/src
+
+    # Don't restart automatically in dev mode
+    restart: "no"
+
+    networks:
+      - clio-network
+
+    # Override CMD for development mode
+    command: python dash_clio_dashboard/app.py
+
+    # Interactive terminal (for debugging)
+    stdin_open: true
+    tty: true
+
+networks:
+  clio-network:
+    driver: bridge
