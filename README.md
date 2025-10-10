@@ -195,4 +195,4 @@ Clio Certified Partner | Full Stack Developer | LegalTech Architect
 
 ---
 
-**Built with ❤️ for law firms seeking data-driven insights**
+**Built for law firms seeking data-driven insights**
