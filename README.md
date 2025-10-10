@@ -191,7 +191,7 @@ For support and questions:
 
 Travis Crawford  
 Clio Certified Partner | Full Stack Developer | LegalTech Architect  
-📧 solutionpartner@cfelab.com | LinkedIn
+📧 solutionpartner@cfelab.com | [LinkedIn](https://linkedin.com/in/traviscrawford85)
 
 ---
 
